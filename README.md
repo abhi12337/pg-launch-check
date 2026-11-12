@@ -42,6 +42,7 @@ by replaying your migrations in order, in memory. CI-friendly exit codes.
 ## Quick start
 
 ```bash
+pipx install git+https://github.com/abhi12337/pg-launch-check   # straight from GitHub
 pipx install .                          # from a clone of this repo (or: pip install .)
 
 pg-launch-check scan                    # current folder
