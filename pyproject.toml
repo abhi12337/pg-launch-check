@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pg-launch-check"
+version = "0.1.0"
+description = "Static PostgreSQL performance and safety lint for backend repos: unindexed foreign keys, locking migrations, N+1 queries, unbounded queries, per-request connections, SQL injection (SQL migrations, Supabase, Prisma, Drizzle, node-postgres, postgres.js, SQLAlchemy, Django, psycopg, asyncpg)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Abheesht Tripathi" }]
+keywords = ["postgres", "postgresql", "migrations", "lint", "prisma", "drizzle", "supabase", "sqlalchemy", "django", "node-postgres", "n+1", "static-analysis", "ci"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Database",
+  "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+pg-launch-check = "pg_launch_check.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["src", "tests"]

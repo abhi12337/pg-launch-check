@@ -1,0 +1,34 @@
+# Copy to .github/workflows/pg-launch-check.yml in a backend repo that uses PostgreSQL.
+# Static only: it reads the checked-out files, never connects to a database and never runs your code.
+name: pg-launch-check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pg-launch-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Pin to a release tag or commit of pg-launch-check you have reviewed.
+      - run: pipx install "git+https://github.com/OWNER/pg-launch-check@v0.1.0"
+      # Migrations that already ran in production cannot be changed any more: set
+      # --applied-up-to to the newest applied one so lock-risk rules only judge new migrations.
+      - name: Lint Postgres usage (fails on medium and above)
+        run: pg-launch-check scan . --no-color --fail-on medium --pg-version 16
+      - name: JSON report artifact
+        if: always()
+        run: pg-launch-check scan . --json --fail-on never > pg-launch-check.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pg-launch-check-report
+          path: pg-launch-check.json
