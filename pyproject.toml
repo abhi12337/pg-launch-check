@@ -39,3 +39,7 @@ where = ["src"]
 testpaths = ["tests"]
 addopts = "-q"
 pythonpath = ["src", "tests"]
+
+[project.urls]
+Homepage = "https://github.com/abhi12337/pg-launch-check"
+Issues = "https://github.com/abhi12337/pg-launch-check/issues"
