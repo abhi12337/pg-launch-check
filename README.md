@@ -84,7 +84,7 @@ is hand-edited).
 only):
 
 ```text
-pg-launch-check 0.1.0
+pg-launch-check 0.1.1
 Scanned demo-pg-app/before/api
 5 file(s): 2 SQL (2 migrations), 0 Prisma schema, 0 Python, 3 JS/TS; 2 table(s) in the schema
 
@@ -243,7 +243,7 @@ MEDIUM   PGL013  Query inside a loop over rows (N+1) [heuristic]
 <summary>The whole demo monorepo: <code>pg-launch-check scan demo-pg-app/before --brief</code></summary>
 
 ```text
-pg-launch-check 0.1.0
+pg-launch-check 0.1.1
 Scanned demo-pg-app/before
 21 file(s): 6 SQL (6 migrations), 1 Prisma schema, 7 Python, 7 JS/TS; 10 table(s) in the schema
 
@@ -713,7 +713,7 @@ limits and keyset pagination, parameterized SQL, one configured pool per process
 index for search, a pooled connection string) produces no findings:
 
 ```text
-pg-launch-check 0.1.0
+pg-launch-check 0.1.1
 Scanned demo-pg-app/after
 25 file(s): 10 SQL (10 migrations), 1 Prisma schema, 7 Python, 7 JS/TS; 10 table(s) in the schema
 
@@ -883,7 +883,7 @@ as an artifact.
 ```json
 {
   "tool": "pg-launch-check",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "targets": [
     "/abs/path/demo-pg-app/before"
   ],
@@ -896,6 +896,7 @@ as an artifact.
   "tables": 10,
   "foreign_keys": 10,
   "pg_version": 14,
+  "skipped": [],
   "exit_code": 1,
   "summary": {
     "critical": 0,
@@ -927,6 +928,11 @@ as an artifact.
   ]
 }
 ```
+
+`"skipped"` lists Python files that could not be parsed (`{"path": ..., "reason": "syntax error
+line 12"}`). Such files are never treated as clean: each is also reported on stderr
+(`warning: app/db.py: syntax error line 12; file not scanned`) and counted in the text header.
+They do not change the exit code.
 
 ## Options
 

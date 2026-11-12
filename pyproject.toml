@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pg-launch-check"
-version = "0.1.0"
+version = "0.1.1"
 description = "Static PostgreSQL performance and safety lint for backend repos: unindexed foreign keys, locking migrations, N+1 queries, unbounded queries, per-request connections, SQL injection (SQL migrations, Supabase, Prisma, Drizzle, node-postgres, postgres.js, SQLAlchemy, Django, psycopg, asyncpg)."
 readme = "README.md"
 requires-python = ">=3.10"

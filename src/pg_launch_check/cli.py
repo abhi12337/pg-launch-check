@@ -94,22 +94,30 @@ def cmd_scan(args) -> int:
             prefix = label.replace("\\", "/").rstrip("/")
             for f in r.findings:
                 f.file = f"{prefix}/{f.file}"
+            for x in r.skipped:
+                x["path"] = f"{prefix}/{x['path']}"
     disabled = {r.upper() for r in args.disable}
     findings = [f for r in results for f in r.findings if f.rule_id not in disabled]
     exit_code = _exit_code(findings, args.fail_on)
+    skipped = [x for r in results for x in r.skipped]
+    for x in skipped:
+        print(f"warning: {x['path']}: {x['reason']}; file not scanned", file=sys.stderr)
     shown = _filter_min(findings, args.min_severity)
     tot = {k: sum(getattr(r, k) for r in results) for k in
            ("files_scanned", "sql_files", "migration_files", "prisma_files", "py_files", "js_files", "tables",
             "foreign_keys")}
     if args.json:
         sys.stdout.write(render_json(shown, meta={
-            "targets": [r.root for r in results], **tot, "pg_version": args.pg_version, "exit_code": exit_code,
+            "targets": [r.root for r in results], **tot, "pg_version": args.pg_version, "skipped": skipped,
+            "exit_code": exit_code,
         }))
     else:
         header = [f"Scanned {', '.join(paths)}",
                   f"{tot['files_scanned']} file(s): {tot['sql_files']} SQL ({tot['migration_files']} migrations), "
                   f"{tot['prisma_files']} Prisma schema, {tot['py_files']} Python, {tot['js_files']} JS/TS; "
                   f"{tot['tables']} table(s) in the schema"]
+        if skipped:
+            header.append(f"{len(skipped)} file(s) could not be parsed and were not scanned (see warnings)")
         if not tot["files_scanned"]:
             header.append("No SQL, Prisma, Python or JS/TS files found.")
         sys.stdout.write(render_text(shown, header=header, color=use_color(force=False if args.no_color else None),

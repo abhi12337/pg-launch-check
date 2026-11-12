@@ -200,3 +200,15 @@ def test_no_network_or_database_imports():
                     "psycopg2", "asyncpg", "pg8000", "sqlite3"):
             assert not re.search(rf"^\s*(import {re.escape(mod)}\b|from {re.escape(mod)} import)", text, re.M), \
                 (p.name, mod)
+
+
+def test_unparseable_python_file_is_warned_not_silently_clean(capsys, tmp_path):
+    (tmp_path / "db.py").write_text("import psycopg\nconn = psycopg.connect()\nx = = 1\n")
+    (tmp_path / "migrations").mkdir()
+    (tmp_path / "migrations" / "0001.py").write_text("x = = 1\n")      # not scanned anyway: not reported
+    code, out, err = run(capsys, "scan", str(tmp_path), "--no-color")
+    assert code == 0                                  # exit code still depends on findings only
+    assert "warning: db.py: syntax error line 3; file not scanned" in err and "0001.py" not in err
+    assert "1 file(s) could not be parsed" in out
+    code, out, _ = run(capsys, "scan", str(tmp_path), "--json")
+    assert json.loads(out)["skipped"] == [{"path": "db.py", "reason": "syntax error line 3"}]

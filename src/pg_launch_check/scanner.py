@@ -51,6 +51,15 @@ class ScanResult:
     js_files: int = 0
     tables: int = 0
     foreign_keys: int = 0
+    skipped: list[dict] = field(default_factory=list)   # [{"path": ..., "reason": "syntax error line 3"}]
+
+
+def parse_failure(exc: BaseException) -> str:
+    if isinstance(exc, SyntaxError):
+        return f"syntax error line {exc.lineno}" if exc.lineno else "syntax error"
+    if isinstance(exc, RecursionError):
+        return "too deeply nested to parse"
+    return f"could not be parsed ({exc})"
 
 
 def _is_test_file(name: str) -> bool:
@@ -206,7 +215,9 @@ def scan_path(target: str, *, excludes: list[str] | None = None, include_tests: 
             res.py_files += 1
             try:
                 py_trees[rel] = ast.parse(text)
-            except (SyntaxError, ValueError):
+            except (SyntaxError, ValueError, RecursionError) as e:
+                if not APP_SKIP_RE.search(rel):      # reported (stderr / JSON "skipped"), never silently clean
+                    res.skipped.append({"path": rel, "reason": parse_failure(e)})
                 continue
     for rel, tree in py_trees.items():
         if not APP_SKIP_RE.search(rel):
